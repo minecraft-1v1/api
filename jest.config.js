@@ -6,7 +6,7 @@ module.exports = {
       tsconfig: './tsconfig.json',
     },
   },
-  moduleFileExtensions: ['ts', 'js', 'json', 'node'],  
+  moduleFileExtensions: ['ts', 'js', 'json', 'node'],
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1"
   },
