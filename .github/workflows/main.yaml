@@ -1,0 +1,41 @@
+name: Pipeline
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+env:
+  TIMEOUT_SERVER_START_SECONDS: 5
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Yarn
+        run: npm install --global yarn
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Build
+        run: yarn build
+
+      - name: Run tests
+        run: yarn test
+
+      - name: Build container
+        run: docker build -t minecraft-api .
+
+      - name: Run container and check health
+        run: |
+          docker container run -d -p 3000:3000 --name minecraft minecraft-api
+          echo "Checking API health...\n\n"
+          docker run --network host appropriate/curl --fail --retry ${{ env.TIMEOUT_SERVER_START_SECONDS }} --retry-connrefused --retry-delay 1 localhost:3000/healthy

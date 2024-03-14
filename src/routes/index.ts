@@ -8,8 +8,8 @@ router.post('/login', limiter, (req, res) => {
   res.send('success');
 });
 
-router.get('/hello', (req, res, next) => {
-  res.locals.message = 'word';
+router.get('/healthy', (req, res, next) => {
+  res.locals.message = 'The service is healthy!';
   next();
 });
 
