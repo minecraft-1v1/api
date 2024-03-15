@@ -1,16 +1,14 @@
 import { Router } from 'express';
 
-import limiter from '@/config/limiter';
+import minecraftServerRoutes from './minecraftServerRoutes';
 
 const router = Router();
 
-router.post('/login', limiter, (req, res) => {
-  res.send('success');
-});
-
-router.get('/healthy', (req, res, next) => {
+router.get('/health', (req, res, next) => {
   res.locals.message = 'The service is healthy!';
   next();
 });
+
+router.use(minecraftServerRoutes);
 
 export default router;

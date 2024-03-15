@@ -8,7 +8,6 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 
 import './config/sentry';
-
 import { stream } from './config/logger';
 import errorHandler from './handlers/errorHandler';
 import responseHandler from './handlers/responseHandler';
@@ -24,8 +23,8 @@ app.use(helmet());
 
 app.use(routes);
 
-app.use(responseHandler);
 app.use(errorHandler);
+app.use(responseHandler);
 
 app.use(Sentry.Handlers.errorHandler());
 

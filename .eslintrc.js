@@ -36,6 +36,7 @@ module.exports = {
 	},
 	rules: {
 		'@typescript-eslint/consistent-type-exports': 'error',
+		'@typescript-eslint/consistent-type-imports': 'error',
     '@typescript-eslint/explicit-function-return-type': [
       'error',
       { allowExpressions: true },
@@ -43,6 +44,7 @@ module.exports = {
 		'detect-bad-words/in-code': 'error',
     'detect-bad-words/in-comment': 'error',
 		eqeqeq: [2, 'always'],
+		'import/no-duplicates': ['warn', { 'prefer-inline': true }],
 		'import/order': [
 			'error',
 			{
@@ -57,7 +59,7 @@ module.exports = {
 				'newlines-between': 'always',
 			},
 		],
-		'import/no-duplicates': ['warn', { 'prefer-inline': true }],
+		'import/prefer-default-export': 'off',
 		'max-len': [
       'error',
       {
