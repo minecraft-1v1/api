@@ -1,10 +1,14 @@
 import { Router } from 'express';
 
-import * as minecraftServerController from '../controllers/minecraftServerController';
+import * as minecraftServerController from '../controllers/minecraftServer/minecraftServerController';
 
 const router = Router();
 
-router.post('/', minecraftServerController.create);
-router.get('/:serverId', minecraftServerController.detail);
+router.route('/').post(minecraftServerController.create);
+
+router
+  .route('/:serverId')
+  .get(minecraftServerController.detail)
+  .delete(minecraftServerController.destroy);
 
 export default router;

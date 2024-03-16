@@ -6,6 +6,7 @@ import {
   DescribeTasksCommand,
   ECSClient,
   RunTaskCommand,
+  StopTaskCommand,
 } from '@aws-sdk/client-ecs';
 import type { NextFunction, Request, Response } from 'express';
 
@@ -107,6 +108,27 @@ export const detail = async (
     publicIp,
     serverId: req.params.serverId,
   };
+
+  return next();
+};
+
+export const destroy = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const client = new ECSClient();
+  const command = new StopTaskCommand({
+    cluster: process.env.CLUSTER_NAME,
+    task: req.params.serverId,
+  });
+  const response = await client.send(command);
+
+  if (response.$metadata.httpStatusCode !== 200) {
+    return next({ message: 'Something went wrong' });
+  }
+
+  res.locals.message = `Stopping ${req.params.serverId}`;
 
   return next();
 };
