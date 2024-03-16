@@ -8,8 +8,13 @@ on:
     branches:
       - master
 
+permissions:
+  id-token: write # This is required for requesting the JWT (AWS OIDC)
+  contents: read # This is required for actions/checkout
+
 env:
   TIMEOUT_SERVER_START_SECONDS: 5
+  ECR_REPO_NAME: minecraft-api
 
 jobs:
   build:
@@ -39,3 +44,26 @@ jobs:
           docker container run -d -p 3000:3000 --name minecraft minecraft-api
           echo "Checking API health...\n\n"
           docker run --network host appropriate/curl --fail --retry ${{ env.TIMEOUT_SERVER_START_SECONDS }} --retry-connrefused --retry-delay 1 localhost:3000/health
+
+      - name: Assume Role via OIDC
+        # if: github.ref == 'refs/heads/master'
+        uses: aws-actions/configure-aws-credentials/@v3
+        with:
+          role-to-assume: ${{ vars.CICD_IAM_ROLE_ARN }}
+          role-session-name: GitHub-Actions-Minecraft-Api
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Login to ECR
+        # if: github.ref == 'refs/heads/master'
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and Push Docker Image to ECR
+        # if: github.ref == 'refs/heads/master'
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ env.ECR_REPO_NAME }}
+          IMAGE_TAG: latest
+        run: |
+          docker tag minecraft-api:latest $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker push "$REGISTRY/$REPOSITORY:$IMAGE_TAG"
