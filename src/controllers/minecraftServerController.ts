@@ -1,8 +1,11 @@
 import {
+  DescribeNetworkInterfacesCommand,
+  EC2Client,
+} from '@aws-sdk/client-ec2';
+import {
   DescribeTasksCommand,
   ECSClient,
   RunTaskCommand,
-  type KeyValuePair,
 } from '@aws-sdk/client-ecs';
 import type { NextFunction, Request, Response } from 'express';
 
@@ -32,21 +35,22 @@ export const create = async (
   if (response.tasks === undefined) {
     logger.error('It was not possible to create a new ECS Task.');
     logger.info(response);
-    res.locals.message = 'Internal Error';
-  } else {
-    const { taskArn } = response.tasks[0];
-    const taskId = taskArn?.split('/').pop() as string;
-    res.locals.message = taskId;
+
+    return next('Internal Error');
   }
-  next();
+
+  const { taskArn } = response.tasks[0];
+  const taskId = taskArn?.split('/').pop() as string;
+  res.locals.message = taskId;
+
+  return next();
 };
 
-export const describe = async (
+export const detail = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
-  // Validate if task is running (if stopped, the ip is not valid)
   const ecs = new ECSClient();
   const describeCommand = new DescribeTasksCommand({
     cluster: process.env.CLUSTER_NAME,
@@ -54,22 +58,55 @@ export const describe = async (
   });
   const response = await ecs.send(describeCommand);
 
-  if (response.tasks === undefined) {
-    res.locals.message = 'Server is not up or does not exist.';
-    next();
-  } else if (response.tasks[0].attachments !== undefined) {
-    const attachments = response.tasks[0]!.attachments[0]!
-      .details as KeyValuePair[];
+  if (!response.tasks) {
+    res.locals.status = 404;
 
-    let networkInterface = '';
-
-    for (let i = 0; i < attachments?.length; i += 1) {
-      if (attachments[i].name === 'networkInterfaceId') {
-        networkInterface = attachments[i].value!;
-      }
-    }
-    res.locals.message = networkInterface;
-    next();
-    // Use https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/ec2/command/DescribeNetworkInterfacesCommand/ to get Public IP
+    return next({ message: 'Task not found' });
   }
+
+  if (response.tasks[0].lastStatus === 'STOPPED') {
+    res.locals.status = 404;
+
+    return next({ message: 'Task is STOPPED' });
+  }
+
+  const attachments = response.tasks[0].attachments?.[0].details;
+
+  if (!attachments) {
+    return next({ message: 'Server is not up or does not exist.' });
+  }
+
+  const networkInterfaceId = attachments.find(
+    (attachment) => attachment.name === 'networkInterfaceId',
+  );
+
+  const networkInterface = networkInterfaceId?.value;
+
+  if (!networkInterface) {
+    res.locals.status = 404;
+
+    return next({ message: 'Attachment not found' });
+  }
+
+  const client = new EC2Client();
+  const command = new DescribeNetworkInterfacesCommand({
+    NetworkInterfaceIds: [networkInterface],
+  });
+  const taskResponse = await client.send(command);
+
+  const { PublicIp: publicIp } =
+    taskResponse?.NetworkInterfaces?.[0].Association ?? {};
+
+  if (!publicIp) {
+    res.locals.status = 404;
+
+    return next({ message: 'Public IP not found' });
+  }
+
+  res.locals.message = {
+    publicIp,
+    serverId: req.params.serverId,
+  };
+
+  return next();
 };

@@ -5,6 +5,6 @@ import * as minecraftServerController from '../controllers/minecraftServerContro
 const router = Router();
 
 router.post('/', minecraftServerController.create);
-router.get('/:serverId', minecraftServerController.describe)
+router.get('/:serverId', minecraftServerController.detail);
 
 export default router;
