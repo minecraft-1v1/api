@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc --project tsconfig.json && tscpaths -p tsconfig.json -s ./src -o ./build",
     "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/server.ts",
+    "lint": "eslint src/**/* --ext .ts --fix",
     "prepare": "husky",
     "start": "pm2 start build/server.js --name api",
     "test": "jest"
@@ -19,6 +20,7 @@
     "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^7.1.1",
     "@typescript-eslint/parser": "^7.1.1",
+    "aws-sdk-client-mock": "^3.0.1",
     "eslint": "^8.2.0",
     "eslint-config-airbnb-typescript": "^18.0.0",
     "eslint-config-prettier": "^9.1.0",
@@ -42,6 +44,8 @@
     "typescript": "^5.4.2"
   },
   "dependencies": {
+    "@aws-sdk/client-ec2": "^3.535.0",
+    "@aws-sdk/client-ecs": "^3.535.0",
     "@sentry/node": "^7.106.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

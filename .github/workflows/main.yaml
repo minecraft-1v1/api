@@ -38,4 +38,4 @@ jobs:
         run: |
           docker container run -d -p 3000:3000 --name minecraft minecraft-api
           echo "Checking API health...\n\n"
-          docker run --network host appropriate/curl --fail --retry ${{ env.TIMEOUT_SERVER_START_SECONDS }} --retry-connrefused --retry-delay 1 localhost:3000/healthy
+          docker run --network host appropriate/curl --fail --retry ${{ env.TIMEOUT_SERVER_START_SECONDS }} --retry-connrefused --retry-delay 1 localhost:3000/health

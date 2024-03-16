@@ -4,7 +4,7 @@ import app from './app';
 
 describe('GET /healthy', () => {
   it('responds with a 200 status and the expected body', async () => {
-    const response = await request(app).get('/healthy');
+    const response = await request(app).get('/health');
     expect(response.statusCode).toBe(200);
     expect(response.body).toEqual({ data: 'The service is healthy!' });
   });

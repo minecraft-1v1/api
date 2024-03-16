@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 
 const responseHandler = (req: Request, res: Response): Response => {
   const { status, message } = res.locals;
