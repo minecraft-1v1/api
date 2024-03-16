@@ -9,6 +9,6 @@ router.get('/health', (req, res, next) => {
   next();
 });
 
-router.use(minecraftServerRoutes);
+router.use('/minecraft-server', minecraftServerRoutes);
 
 export default router;

@@ -4,6 +4,7 @@ import * as minecraftServerController from '../controllers/minecraftServerContro
 
 const router = Router();
 
-router.post('/minecraft-server', minecraftServerController.create);
+router.post('/', minecraftServerController.create);
+router.get('/:serverId', minecraftServerController.describe)
 
 export default router;
